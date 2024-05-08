@@ -1,6 +1,5 @@
-import pandas
-import numpy as np
-from typing import List
+import pandas as pd
+import logging
 
 from models.team import Team
 
@@ -16,25 +15,24 @@ Vérifications à faire :
 
 class TeamsGenCollector:
 
-    def __init__(self, csv_file, show_log=True):
+    def __init__(self, csv_file):
         #Importation de toutes les données
-        self.df = pandas.read_csv(csv_file, encoding='utf-8', sep=None, engine='python', skipinitialspace=True).dropna(how='all')
+        logging.info(f"Collecte des données de {csv_file}")
+
+        self.df = pd.read_csv(csv_file, encoding='utf-8', sep=None, engine='python', skipinitialspace=True).dropna(how='all')
         self.csv_file = csv_file
-        self.number_of_runners = self.check_number_of_runners()
-        if show_log: print(f"Collecte des données de {csv_file}")
+        self.number_of_runners = self.get_number_of_runners()
 
         self.check_puce_duplicates()
+
     
-    def get_df_info(self):
-        return self.df.info()
-    
-    def create_teams(self, show_log=True) -> (List[Team]):
-        '''Crée la liste d'équipes à partir des données de teams_Gen.csv.'''
-        if show_log: print(f"Création des équipes à partir de {self.csv_file}...")
+    def create_teams(self) -> list[Team]:
+        '''Crée la liste d'équipes à partir des données de du fichier d'équipes.'''
+        print(f"Création des équipes à partir de {self.csv_file}...")
 
         teams_list = []
 
-        for idx, row in self.df.iterrows():
+        for _, row in self.df.iterrows():
             concs_list = []
             
             # Création d'une liste de tuples (nom, prenom) des concurrents
@@ -42,12 +40,6 @@ class TeamsGenCollector:
                 nom = row[f'Nom Conc {conc_idx}']
                 prenom = row[f'Prenom Conc {conc_idx}']
                 concs_list.append((str(nom), str(prenom)))
-
-            # Détermine si le nom de la colonne de contact est 'Tel' ou 'Mail'
-            if 'Tel' in self.df.columns:
-                contact = row['Tel']
-            elif 'Mail' in self.df.columns:
-                contact = row['Mail']
 
             # On force le type de chaque élément pour être au clair sur le type des données
             new_team = Team(
@@ -57,28 +49,37 @@ class TeamsGenCollector:
                 str(row['Mixite']).upper(),
                 str(row['Nom']),
                 concs_list,
-                str(contact)
+                str(row['Contact'])
             )
 
-            if show_log: print(f"Création de l'équipe {new_team}")
+            logging.info(f"Création de l'équipe {new_team}")
             teams_list.append(new_team)
 
-        if show_log: print(f"Toutes les équipes ont bien été implentées.\n")
+        logging.info(f"Toutes les équipes ont bien été implentées.\n")
         return teams_list
 
-    def check_number_of_runners(self):
-        '''Détermine le nombre de concurrent basé sur les colonnes de teams_Gen.csv'''
-        conc_idx = 1
+
+    ##############################
+    ### Appelées dans __init__() ###
+    ##############################
+    
+    def get_number_of_runners(self):
+        '''Détermine le nombre de concurrents basé sur les colonnes du fichier d'équipes.'''
+        conc_idx = 0
         while f'Prenom Conc {conc_idx}' in self.df.columns:
             conc_idx += 1
-        return conc_idx - 1
+        return conc_idx
     
 
     def check_puce_duplicates(self):
-        '''Vérifie qu'il n'y a pas de doublons de puces dans teams_Gen.csv'''
+        '''Vérifie qu'il n'y a pas de doublons de puces dans le fichier d'équipes.'''
         if self.df['Puce'].duplicated().any():
             raise TeamsGenPuceDuplicatesError(self.df[self.df['Puce'].duplicated(keep=False)])
-        print("Chaque puce n'est bien attribuée qu'une seule fois dans teams_Gen.csv.")
+        logging.info("Chaque puce n'est bien attribuée qu'une seule fois dans teams_Gen.csv.")
+
+
+
+
 
 
 class TeamsGenPuceDuplicatesError(Exception):
