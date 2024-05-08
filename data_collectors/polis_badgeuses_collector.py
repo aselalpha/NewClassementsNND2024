@@ -1,7 +1,5 @@
-import pandas
-from typing import List
-
-from epreuves.epreuve import Epreuve
+import pandas as pd
+import logging
 
 '''
 On garde toutes les colonnes
@@ -18,11 +16,11 @@ class PolisBadgeusesCollector:
     Classe appelée après PolisParcoursCollector, une fois que toutes les épreuves ont été créées
     """
 
-    def __init__(self, csv_file, show_log=True):
-        """Importe toutes les données"""
-        self.df = pandas.read_csv(csv_file).dropna(how='all')
+    def __init__(self, csv_file: str):
+        # Importation des données
+        self.df = pd.read_csv(csv_file).dropna(how='all')
         self.csv_file = csv_file
-        if show_log: print(f"Collecte des données de {csv_file}")
+        logging.info(f"Collecte des données de {csv_file}")
     
 
     def check_epreuves_are_defined(self):

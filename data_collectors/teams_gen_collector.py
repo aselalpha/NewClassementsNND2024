@@ -59,9 +59,9 @@ class TeamsGenCollector:
         return teams_list
 
 
-    ##############################
+    ################################
     ### Appelées dans __init__() ###
-    ##############################
+    ################################
     
     def get_number_of_runners(self):
         '''Détermine le nombre de concurrents basé sur les colonnes du fichier d'équipes.'''

@@ -37,6 +37,11 @@ class PolisParcoursCollector:
         return epreuves_list
 
 
+
+    #######################
+    ### PRIVATE METHODS ###
+    #######################
+
     def _create_epreuve_object(self, row: pd.Series) -> Epreuve:
         """Retourne une sous-classe de Épreuve selon type_epreuve (défini avec la méthode __type_epreuve)."""
 
@@ -59,7 +64,6 @@ class PolisParcoursCollector:
         
         logging.info(f"Création de l'épreuve {epreuve_object}")
         return epreuve_object
-
 
 
     def _append_mg_to_epreuve_course(self, row: pd.Series, epreuves_list: list[EpreuveCourse]):
