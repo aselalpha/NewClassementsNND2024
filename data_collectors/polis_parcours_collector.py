@@ -1,7 +1,7 @@
-import pandas
-from typing import List
+import pandas as pd
+import logging
 
-from epreuves.epreuve import Epreuve, EpreuveCourse, EpreuveActi
+from models.epreuve import Epreuve, EpreuveCourse, EpreuveActi
 
 '''
 On garde toutes les colonnes
@@ -12,13 +12,32 @@ Vérifications à faire :
 
 class PolisParcoursCollector:
     
-    def __init__(self, csv_file, show_log=True):
+    def __init__(self, csv_file: str):
         #Importation de toutes les données
-        self.df = pandas.read_csv(csv_file).dropna(how='all')
+        self.df = pd.read_csv(csv_file).dropna(how='all')
         self.csv_file = csv_file
-        if show_log: print(f"Collecte des données de {csv_file}")
-    
-    def _create_epreuve_object(self, row, epreuves_list, show_log=True) -> (Epreuve):
+        logging.info(f"Collecte des données de {csv_file}")
+        
+
+    def create_epreuves(self) -> list[Epreuve]:
+        """Crée la liste des Épreuves."""
+        logging.info(f"Implémentation des épreuves de {self.csv_file}")
+
+        epreuves_list: list[Epreuve] = []
+
+        for _, row in self.df.iterrows():
+
+            if not 'meilleur grimpeur' in row['nom']:
+                new_epreuve: Epreuve = self._create_epreuve_object(row)
+                epreuves_list.append(new_epreuve)
+            else:
+                self._append_mg_to_epreuve_course(row, epreuves_list)
+
+        logging.info(f"Toutes les épreuves ont bien été implémentées.\n")
+        return epreuves_list
+
+
+    def _create_epreuve_object(self, row: pd.Series) -> Epreuve:
         """Retourne une sous-classe de Épreuve selon type_epreuve (défini avec la méthode __type_epreuve)."""
 
         if row['type'] in ['trail', 'vtt']:
@@ -38,29 +57,13 @@ class PolisParcoursCollector:
                 {'or':float(row['or']), 'argent':float(row['argent']), 'bronze':float(row['bronze'])}
             )
         
-        if show_log: print(f"Création de l'épreuve {epreuve_object}")
+        logging.info(f"Création de l'épreuve {epreuve_object}")
         return epreuve_object
-        
 
-    def create_epreuves(self, show_log=True) -> (List[Epreuve]):
-        """Retourne une liste d'objets Épreuve"""
-        if show_log: print(f"Implémentation des épreuves de {self.csv_file}")
 
-        epreuves_list = []
 
-        for idx, row in self.df.iterrows():
-
-            if not 'meilleur grimpeur' in row['nom']:
-                new_epreuve = self._create_epreuve_object(row, epreuves_list)
-                epreuves_list.append(new_epreuve)
-            else:
-                self._append_mg_to_epreuve_course(row, epreuves_list)
-
-        if show_log: print(f"Toutes les épreuves ont bien été implémentées.\n")
-        return epreuves_list
-    
-
-    def _append_mg_to_epreuve_course(self, row, epreuves_list: list[EpreuveCourse]):
+    def _append_mg_to_epreuve_course(self, row: pd.Series, epreuves_list: list[EpreuveCourse]):
+        """Modifie l'épreuve contenant un meilleur grimpeur pour l'y intégrer."""
 
         mg_epreuve_name = str(row['nom']).replace(" meilleur grimpeur", '')
         for epreuve in epreuves_list:
