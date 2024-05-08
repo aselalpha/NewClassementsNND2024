@@ -85,7 +85,7 @@ class OneDayController:
         logging.info("Attribution des données des doigts aux équipes correspondantes...")
 
         for _, row in self.datas_graid.df_cleaned.iterrows():
-            team = self.datas_graid.get_team_from_doigt(row, self.teams_list)
+            team = self.get_team_from_doigt(row)
             team.transit_times = row.dropna()
 
             # Convertir les colonnes Record x CN en int
@@ -207,6 +207,13 @@ class OneDayController:
 
 
 
+
+    def get_team_from_doigt(self, row) -> Team:
+        """Récupère l'équipe correspondant à la ligne passée en argument."""
+        for team in self.teams_list:
+            if team.puce == row['SIID']:
+                return team
+        logging.warning(f"Le doigt de SIID {row['SIID']} semble n'avoir aucune équipe atitrée !")
 
 
     def get_epreuve(self, epreuve_name: str) -> EpreuveCourse|EpreuveActi:

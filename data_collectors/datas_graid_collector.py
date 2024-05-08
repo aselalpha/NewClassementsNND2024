@@ -48,14 +48,6 @@ class DatasGraidCollector:
         
         logging.info(f"Les colonnes {useful_columns} de datas_graid ont été conservées.\n")
         return df_cleaned[useful_columns]
-
-    
-    def get_team_from_doigt(self, row, teams_list: list[Team]) -> Team:
-        """Récupère l'équipe correspondant à la ligne passée en argument."""
-        for team in teams_list:
-            if team.puce == row['SIID']:
-                return team
-        logging.warning(f"Le doigt de SIID {row['SIID']} semble n'avoir aucune équipe atitrée !")
     
 
 
