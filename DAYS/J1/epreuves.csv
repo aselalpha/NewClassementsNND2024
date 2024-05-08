@@ -1,0 +1,21 @@
+nom,points,temps_ref,points_gain_min,points_perte_min,type,or,argent,bronze
+Obli 1 trail,0,91,1.88,0,trail,0,0,0
+Obli 2 VTT,0,99,1.57,0,vtt,0,0,0
+Obli 3 VTT,0,133,1.57,0,vtt,0,0,0
+Obli 2 VTT meilleur grimpeur,0,8,6.91,0,vtt,0,0,0
+BO1 R&B,20,70,1.07,0,trail,0,0,0
+BO2 trail,20,61,1.35,0,trail,0,0,0
+BO3 R&B,20,123,0.96,0,trail,0,0,0
+BO3 VTT,20,87,0.87,0,vtt,0,0,0
+BO CO normale,40,50,2,0,trail,0,0,0
+BO Canoe,20,20,1,0,trail,0,0,0
+Parcours enquete,40,,,,acti,60,20,0
+Paris canoe,5,,,,acti,5,2.5,0
+Acti plantes,12.5,,,,acti,2.5,2.5,0
+Passerelle,20,,,,acti,6,4,2
+Arene IPS,7,,,,acti,3,0,0
+Hockey sur gazon,10,,,,acti,8,0,0
+Basket puissance 4,5,,,,acti,5,0,0
+Rameurs,5,,,,acti,8,6,3
+Surf mecanique,3,,,,acti,7,4,2
+Tir elastique,10,,,,acti,3,0,0

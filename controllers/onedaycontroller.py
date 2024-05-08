@@ -22,14 +22,14 @@ class OneDayController:
         # Récupération de toutes les données d'initialisation
         with open(self.day_repository+'initialisation.json') as json_file:
             data = json.load(json_file)
-        
-        self.mass_start: str|None = data['mass_start']
 
         self.datas_graid = DatasGraidCollector(data['doigts_csv'])
         self.data_actis = DataActisCollector(data['actis_excel'])
         self.teams_gen = TeamsGenCollector(data['teams_excel'])
         self.polis_parcours = PolisParcoursCollector(data['epreuves_excel'])
         self.polis_badgeuses = PolisBadgeusesCollector(data['badgeuses_excel'])
+
+        self.mass_start: str|None = data['mass_start']
 
         self.teams_list: list[Team] = self.teams_gen.create_teams()
         self.epreuves_list: list[EpreuveCourse|EpreuveActi] = self.polis_parcours.create_epreuves()

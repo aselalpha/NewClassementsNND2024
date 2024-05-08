@@ -1,0 +1,39 @@
+epreuve,signaleur,numero,fonction,points
+Obli 1 trail,S0,-1,depart,0
+Obli 1 trail,S1,1,gel,0
+Obli 1 trail,S2,2,degel,0
+Obli 1 trail,S3,3,fin,0
+Obli 2 VTT,S4,4,depart,0
+Obli 2 VTT,S5,5,gel,0
+Obli 2 VTT,S6,6,degel,0
+Obli 2 VTT,S7,7,gel,0
+Obli 2 VTT,S8,8,degel,0
+Obli 2 VTT,S8,8,mg_debut,0
+Obli 2 VTT,S9,9,mg_fin,0
+Obli 2 VTT,S10,10,gel,0
+Obli 2 VTT,S11,11,degel,0
+Obli 2 VTT,S12,12,gel,0
+Obli 2 VTT,S13,13,degel,0
+Obli 2 VTT,S14,14,fin,0
+Obli 3 VTT,S15,15,depart,0
+Obli 3 VTT,S16,16,gel,0
+Obli 3 VTT,S17,17,degel,0
+Obli 3 VTT,S18,18,gel,0
+Obli 3 VTT,S19,19,degel,0
+Obli 3 VTT,S20,20,gel,0
+Obli 3 VTT,S21,21,degel,0
+Obli 3 VTT,S22,22,gel,0
+Obli 3 VTT,S23,23,degel,0
+Obli 3 VTT,S24,24,fin,0
+BO CO normale,S25,25,depart,0
+BO CO normale,S26,25,fin,0
+BO1 R&B,S27,26,depart,0
+BO1 R&B,S28,26,fin,0
+BO2 trail,S29,27,depart,0
+BO2 trail,S30,27,fin,0
+BO3 R&B,S31,28,depart,0
+BO3 R&B,S32,28,fin,0
+BO3 VTT,S33,29,depart,0
+BO3 VTT,S34,29,fin,0
+BO Canoe,S35,30,depart,0
+BO Canoe,S36,30,fin,0
