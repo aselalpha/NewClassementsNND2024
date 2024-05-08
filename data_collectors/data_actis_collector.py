@@ -1,4 +1,4 @@
-import pandas
+import pandas as pd
 
 
 """
@@ -17,16 +17,16 @@ A VERIFIER:
 
 class DataActisCollector:
 
-    def __init__(self, excel_file):
+    def __init__(self, excel_file: str):
         # Dict of sheets. "A:H" englobe les huit colonnes utilisées de chaque feuille.
-        self.excel_file = pandas.read_excel(excel_file, sheet_name=None, usecols="A:G")
+        self.excel_file = pd.read_excel(excel_file, sheet_name=None, usecols="A:G")
 
         self.actis_dict = {}
         for sheet_name, sheet_data in self.excel_file.items():
             self.actis_dict[sheet_name] = self.extract_data(sheet_data)
     
     
-    def extract_data(self, sheet):
+    def extract_data(self, sheet: pd.DataFrame) -> dict:
         
         """Extrait les données d'un sheet."""
 
