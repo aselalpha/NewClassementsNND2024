@@ -15,11 +15,11 @@ class MultiDaysController:
         """
         Crée la liste des OneDayController permettant de gérer chaque journée.
         """
-        logging.info("Récupération de la liste des journées...")
+        logging.info("RÉCUPÉRATION DES JOURNÉES...")
 
         for folder in os.listdir(self.days_repository):
             # Récupération du numéro de la journée correspondant
             day_num: int = int(folder[1:])
-            self.odc_list.append(OneDayController(self.days_repository+folder+'/', day_num))
+            logging.info("="*50 + f"\nRécupération de la journée J{day_num}...\n" + "-"*50)
 
-        logging.info(f"Les journées {[odc for odc in self.odc_list]} ont été récupérées.")
+            self.odc_list.append(OneDayController(self.days_repository+'/'+folder+'/', day_num))

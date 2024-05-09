@@ -1,9 +1,9 @@
 {
     "mass_start": "05:26:12",
     
-    "teams_excel": "JOURNEES/J1/teams.csv",
-    "doigts_csv": "JOURNEES/J1/TDJ2024_datas_graid.csv",
-    "actis_excel": "JOURNEES/J1/Points Activités NnD 2024 (1).xlsx",
-    "epreuves_excel": "JOURNEES/J1/epreuves.csv",
-    "badgeuses_excel": "JOURNEES/J1/badgeuses.csv"
+    "teams_excel": "DAYS/J1/teams.csv",
+    "doigts_csv": "DAYS/J1/TDJ2024_datas_graid.csv",
+    "actis_excel": "DAYS/J1/Points Activites NnD 2024.xlsx",
+    "epreuves_excel": "DAYS/J1/epreuves.csv",
+    "badgeuses_excel": "DAYS/J1/badgeuses.csv"
 }

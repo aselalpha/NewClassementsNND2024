@@ -17,7 +17,7 @@ class TeamsGenCollector:
 
     def __init__(self, csv_file):
         #Importation de toutes les données
-        logging.info(f"Collecte des données de {csv_file}")
+        logging.info(f"Lecture de {csv_file}.")
 
         self.df = pd.read_csv(csv_file, encoding='utf-8', sep=None, engine='python', skipinitialspace=True).dropna(how='all')
         self.csv_file = csv_file
@@ -28,7 +28,7 @@ class TeamsGenCollector:
     
     def create_teams(self) -> list[Team]:
         '''Crée la liste d'équipes à partir des données de du fichier d'équipes.'''
-        print(f"Création des équipes à partir de {self.csv_file}...")
+        logging.info(f"Création des équipes à partir de {self.csv_file}...")
 
         teams_list = []
 
@@ -55,7 +55,7 @@ class TeamsGenCollector:
             logging.info(f"Création de l'équipe {new_team}")
             teams_list.append(new_team)
 
-        logging.info(f"Toutes les équipes ont bien été implentées.\n")
+        logging.info(f"Toutes les équipes ont bien été implémentées.\n" + "-"*50)
         return teams_list
 
 
@@ -75,7 +75,7 @@ class TeamsGenCollector:
         '''Vérifie qu'il n'y a pas de doublons de puces dans le fichier d'équipes.'''
         if self.df['Puce'].duplicated().any():
             raise TeamsGenPuceDuplicatesError(self.df[self.df['Puce'].duplicated(keep=False)])
-        logging.info("Chaque puce n'est bien attribuée qu'une seule fois dans teams_Gen.csv.")
+        logging.debug("Chaque puce n'est bien attribuée qu'une seule fois dans teams_Gen.csv.")
 
 
 

@@ -17,10 +17,11 @@ class PolisBadgeusesCollector:
     """
 
     def __init__(self, csv_file: str):
+        logging.info(f"Lecture de {csv_file}.")
+
         # Importation des données
         self.df = pd.read_csv(csv_file).dropna(how='all')
         self.csv_file = csv_file
-        logging.info(f"Collecte des données de {csv_file}")
     
 
     def check_epreuves_are_defined(self):

@@ -34,7 +34,7 @@ class Team:
         self.times_columns = []
 
     def __repr__(self):
-        return f'Team(Puce: {self.puce}, Num: {self.dossard}, {self.team_name})'
+        return f'Team({self.puce} [{self.dossard}] {self.team_name})'
     
     def __eq__(self, other):
         """Compare deux objets Team, qui sont considérées comme identiques si elles ont même nom, même numéro de puce, même numéro de dossard et même liste de concs."""

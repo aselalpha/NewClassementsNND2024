@@ -13,15 +13,16 @@ Vérifications à faire :
 class PolisParcoursCollector:
     
     def __init__(self, csv_file: str):
+        logging.info(f"Lecture de {csv_file}.")
+
         #Importation de toutes les données
         self.df = pd.read_csv(csv_file).dropna(how='all')
         self.csv_file = csv_file
-        logging.info(f"Collecte des données de {csv_file}")
         
 
     def create_epreuves(self) -> list[Epreuve]:
         """Crée la liste des Épreuves."""
-        logging.info(f"Implémentation des épreuves de {self.csv_file}")
+        logging.info(f"Création des épreuves à partir de {self.csv_file}...")
 
         epreuves_list: list[Epreuve] = []
 
@@ -33,7 +34,7 @@ class PolisParcoursCollector:
             else:
                 self._append_mg_to_epreuve_course(row, epreuves_list)
 
-        logging.info(f"Toutes les épreuves ont bien été implémentées.\n")
+        logging.info(f"Toutes les épreuves ont bien été implémentées.\n" + "-"*50)
         return epreuves_list
 
 
@@ -68,8 +69,9 @@ class PolisParcoursCollector:
 
     def _append_mg_to_epreuve_course(self, row: pd.Series, epreuves_list: list[EpreuveCourse]):
         """Modifie l'épreuve contenant un meilleur grimpeur pour l'y intégrer."""
-
+        
         mg_epreuve_name = str(row['nom']).replace(" meilleur grimpeur", '')
         for epreuve in epreuves_list:
             if epreuve.name == mg_epreuve_name:
                 epreuve.meilleur_grimpeur = {'reference_time': float(row['temps_ref']), 'gain_per_minute': float(row['points_gain_min']), 'loss_per_minute': float(row['points_perte_min'])}
+                logging.info(f"Ajout d'une portion meilleur grimpeur à {epreuve.name}.")

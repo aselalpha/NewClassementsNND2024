@@ -34,8 +34,12 @@ class OneDayController:
         self.teams_list: list[Team] = self.teams_gen.create_teams()
         self.epreuves_list: list[EpreuveCourse|EpreuveActi] = self.polis_parcours.create_epreuves()
 
-        self.epreuves_courses_list: list[EpreuveCourse] = [course for course in self.epreuves_courses_list if isinstance(course, EpreuveCourse)]
-        self.epreuves_actis_list: list[EpreuveActi] = [acti for acti in self.epreuves_courses_list if isinstance(acti, EpreuveActi)]
+        self.epreuves_courses_list: list[EpreuveCourse] = [course for course in self.epreuves_list if isinstance(course, EpreuveCourse)]
+        self.epreuves_actis_list: list[EpreuveActi] = [acti for acti in self.epreuves_list if isinstance(acti, EpreuveActi)]
+
+
+    def __repr__(self) -> str:
+        return f"ODC(J{self.day_num})"
 
 
     def initialize(self):
@@ -43,17 +47,7 @@ class OneDayController:
         self.add_badgeuses_to_epreuves()
         self.add_datas_doigts_to_teams()
 
-        teams_to_ignore = []
-        # Equipe ignorée si elle n'a rien bipée du tout
-        for team in self.teams_list:
-            if len(team.transit_times) == 0:
-                print(f"L'équipe ({team.dossard}) {team.team_name} est ignorée, elle n'a couru aucune épreuve.")
-                teams_to_ignore.append(team)
-        for team in teams_to_ignore:
-            self.teams_list.remove(team)
-
-        if self.mass_start is not None:
-            self.add_mass_start(self.mass_start)
+        self.add_mass_start()
 
         self.add_runned_epreuves_to_teams()
         self.add_actis_to_teams()
@@ -62,7 +56,7 @@ class OneDayController:
 
     def add_badgeuses_to_epreuves(self):
         """Ajoute les badgeuses lues dans le POLIS_badgeuses à l'épreuve correspondante de epreuves_list."""
-        logging.info("Ajout des poinçons aux épreuves...")
+        logging.info("Ajout des badgeuses aux épreuves...")
 
         for _, row in self.polis_badgeuses.df.iterrows():
             epreuve: EpreuveCourse = self.get_epreuve(row['epreuve'])
@@ -70,13 +64,13 @@ class OneDayController:
             poincon_to_add = Poincon(epreuve, str(row['signaleur']), int(row['numero']), str(row['fonction']), float(row['points']))
             epreuve.badgeuses_list.append(poincon_to_add)
             
-            logging.info(f"Ajout de la badgeuse {row['numero']} à l'épreuve {epreuve.name}")
+            logging.info(f"Ajout de la badgeuse {row['numero']} ({row['fonction']}) à {epreuve.name}")
             
             # Si présence d'un meilleur grimpeur dans l'épreuve, on arrange les poinçons pour qu'il n'y ait pas de doublon
             if epreuve.meilleur_grimpeur and poincon_to_add.role == 'fin':
                 epreuve.clean_meilleur_grimpeur()
         
-        logging.info("Toutes les badgeuses ont été ajoutées aux épreuves correspondantes.\n")
+        logging.info("Toutes les badgeuses ont été ajoutées aux épreuves correspondantes.\n" + "-"*50)
 
 
     def add_datas_doigts_to_teams(self):
@@ -93,22 +87,29 @@ class OneDayController:
             team.transit_times[CN_columns_of_transit_times] = team.transit_times[CN_columns_of_transit_times].astype('int64')
 
             logging.info(f"Attribution des données à {team.team_name}")
+        
+        self.clean_teams_not_running()
 
-        logging.info("Toutes les données des doigts ont été attribuées aux équipes correspondantes.\n")
+        logging.info("Toutes les données des doigts ont été attribuées aux équipes correspondantes.\n" + "-"*50)
 
 
-    def add_mass_start(self, mass_start: str):
+    def add_mass_start(self):
         """
         Ajoute le temps mass_start correspondant à la badgeuse -1 aux données de doigt.
         """
+
+        if self.mass_start == None:
+            logging.info(f"Pas de mass start pris en compte.\n" + "-"*50)
+            return
         
         # Vérifie le format d'entrée de mass_start
-        self.check_mass_start_time_format(mass_start)
-        
+        self.check_mass_start_time_format()
         # Ajout du temps de mass_start aux équipes.
         for team in self.teams_list:
-            mass_start_CN_and_time = pd.Series({'Record 0 CN': -1, 'Record 0 time': mass_start})
+            mass_start_CN_and_time = pd.Series({'Record 0 CN': -1, 'Record 0 time': self.mass_start})
             team.transit_times = pd.concat([mass_start_CN_and_time, team.transit_times])
+        
+        logging.info(f"Prise en compte de l'horaire de mass start {self.mass_start}.\n" + "-"*50)
 
 
     def add_runned_epreuves_to_teams(self):
@@ -118,6 +119,7 @@ class OneDayController:
         Regarde dans les badgeuses présentes dans team.transit_times (index Record x CN) et à quelle épreuve ces badgeuses sont affectées.\n
         Vérifie dans le même temps si pour chaque épreuve courue, toutes les badgeuses sont bien présentes.
         """
+        logging.info("Ajout des épreuves courues à chaque équipe...")
 
         global_missing_bip = False
 
@@ -129,10 +131,13 @@ class OneDayController:
                 for poincon in epreuve.badgeuses_list:                    
                     if poincon.badgeuse in team_badgeuses_list:
                         team.runned_epreuve_courses_list.append({'epreuve_course': epreuve})
+                        logging.info(f"{team} a couru {epreuve}.")
                         break
 
             team_missing_bip = team.check_all_epreuve_badgeuses_are_present()
             if team_missing_bip: global_missing_bip = True
+        
+        logging.info("Chaque équipe a sa liste d'épreuves courues.\n" + "-"*50)
 
         # Stoppe le programme si une équipe n'a pas bipé une badgeuse de l'épreuve, une fois que toutes les badgeuses manquantes de toutes les équipes ont été détectées.
         if global_missing_bip:
@@ -144,6 +149,7 @@ class OneDayController:
         """
         Ajoute à chaque équipe les actis auxquelles elle a participé, à partir de data_actis.
         """
+        logging.info("Ajout des résultats des actis à chaque équipe...")
 
         # On itère sur les feuilles d'activité de l'Excel
         for acti in self.data_actis.actis_dict.values():
@@ -157,6 +163,10 @@ class OneDayController:
                                                        'medal': participating_team['medal'],
                                                        'participation_points': epreuve_acti_object.participation_points,
                                                        'ranking_points': epreuve_acti_object.or_argent_bronze[participating_team['medal']]})
+                
+                logging.info(f"{epreuve_acti_object.name}: {participating_team['medal'].upper()} pour [{team_to_add.dossard}] {team_to_add.team_name}")
+        
+        logging.info("Tous les résultats d'actis sont ajoutés.\n" + "-"*50)
 
 
     def get_team_from_dossard(self, dossard) -> (Team):
@@ -185,24 +195,22 @@ class OneDayController:
         
         for epreuve_course in self.epreuves_courses_list:
             epreuve_course.average_elementary_times()
-            print(epreuve_course.name, epreuve_course.mean_times_between_poincons)
+            logging.info(epreuve_course.name, epreuve_course.mean_times_between_poincons)
 
 
 
-    def check_mass_start_time_format(self, mass_start: str):
+    def check_mass_start_time_format(self):
         """Check if the format of mass_start is hh:mm:ss"""
-        logging.info(f"Vérification du format horaire du mass_start...")
         try:
-            time_list = mass_start.split(':')
+            time_list = self.mass_start.split(':')
             if len(time_list) != 3:
-                raise MassStartTimeFormatNotValidError(mass_start)
+                raise MassStartTimeFormatNotValidError(self.mass_start)
             for time in time_list:
                 if len(time) != 2:
-                    raise MassStartTimeFormatNotValidError(mass_start)
+                    raise MassStartTimeFormatNotValidError(self.mass_start)
                 int(time)
-            logging.info(print(f"{mass_start} est valide."))
         except ValueError:
-            raise MassStartTimeFormatNotValidError(mass_start)
+            raise MassStartTimeFormatNotValidError(self.mass_start)
 
 
 
@@ -228,6 +236,18 @@ class OneDayController:
                 if epreuve_name == epreuve.name:
                     return epreuve
             raise EpreuveInPolisBadgeusesNotFoundError(epreuve_name, self.epreuves_list)
+
+    def clean_teams_not_running(self):
+        """Supprime de la liste des équipes toutes celles qui n'ont pas de donnée de doigt associée."""
+
+        teams_to_ignore = []
+        # Equipe ignorée si elle n'a rien bipée du tout
+        for team in self.teams_list:
+            if len(team.transit_times) == 0:
+                logging.warning(f"Doigt {team.puce} de l'équipe [{team.dossard}] {team.team_name} non récupéré. Celle-ci est ignorée.")
+                teams_to_ignore.append(team)
+        for team in teams_to_ignore:
+            self.teams_list.remove(team)
 
 
 

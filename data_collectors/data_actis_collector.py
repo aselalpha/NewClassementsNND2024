@@ -1,4 +1,5 @@
 import pandas as pd
+import logging
 
 
 """
@@ -18,6 +19,8 @@ A VERIFIER:
 class DataActisCollector:
 
     def __init__(self, excel_file: str):
+        logging.info(f"Lecture de {excel_file}.")
+
         # Dict of sheets. "A:H" englobe les huit colonnes utilisées de chaque feuille.
         self.excel_file = pd.read_excel(excel_file, sheet_name=None, usecols="A:G")
 
