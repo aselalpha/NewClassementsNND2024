@@ -1,6 +1,6 @@
 from copy import deepcopy
-from typing import List, Tuple
 import pandas
+import logging
 from datetime import datetime
 
 from models.epreuve import EpreuveCourse
@@ -8,7 +8,7 @@ from models.poincon import Poincon
 
 class Team:
 
-    def __init__(self, puce: int, dossard: int, ent: bool, mixite: str, team_name: str, concs_list: List[Tuple], contact: str):
+    def __init__(self, puce: int, dossard: int, ent: bool, mixite: str, team_name: str, concs_list: list[tuple], contact: str):
         self.puce = puce
         self.dossard = dossard
         self.team_name = team_name
@@ -17,11 +17,11 @@ class Team:
         self.mixite = mixite
         self.contact = contact
         self.transit_times = pandas.Series()
-        self.runned_epreuve_courses_list: List[dict] = []   # De la forme [{'epreuve_course': Epreuve1, 'times': [{'badgeuse_num': 52, 'signaleur': 'S1', ... , 'bip_time': 11:52:34}], 'points': 0.0, 'elementary_times': [], 'total_time': 0.0, 'points_dict': {}, 'total_points': 150}, ...]
+        self.runned_epreuve_courses_list: list[dict] = []   # De la forme [{'epreuve_course': Epreuve1, 'times': [{'badgeuse_num': 52, 'signaleur': 'S1', ... , 'bip_time': 11:52:34}], 'points': 0.0, 'elementary_times': [], 'total_time': 0.0, 'points_dict': {}, 'total_points': 150}, ...]
                                                             # A CHANGER, pour rendre plus lisible qu'une liste de dict de dict
-        self.epreuve_actis_list: List = []    # De la forme [{'epreuve_acti': Epreuve1, 'medal': 'or', 'points': 5}]
+        self.epreuve_actis_list: list = []    # De la forme [{'epreuve_acti': Epreuve1, 'medal': 'or', 'points': 5}]
         
-        self.missing_bips: List = []
+        self.missing_bips: list = []
 
         self.courses_total_time: float = 0.0
         self.courses_points: float = 0.0
@@ -33,9 +33,11 @@ class Team:
         self.CN_columns = []
         self.times_columns = []
 
+
     def __repr__(self):
         return f'Team({self.puce} [{self.dossard}] {self.team_name})'
-    
+
+
     def __eq__(self, other):
         """Compare deux objets Team, qui sont considérées comme identiques si elles ont même nom, même numéro de puce, même numéro de dossard et même liste de concs."""
 
@@ -44,36 +46,33 @@ class Team:
         return False
 
 
-    def get_CN_columns(self) -> (List):
+    def get_CN_columns(self) -> list[int]:
         """
         Filter and keep only the columns in the transit_times DataFrame that contain 'CN' in their index.\n
         Returns a list.
         """
         try:
-            CN_columns = self.transit_times.loc[self.transit_times.index.str.contains('CN')].astype('int64').to_list()
+            CN_columns: list[int] = self.transit_times.loc[self.transit_times.index.str.contains('CN')].astype('int64').to_list()
         except AttributeError as error:
-            print("self.transit_times n'a peut-être pas été initialisé...")
+            logging.error("self.transit_times n'a peut-être pas été initialisé...")
             raise error
         return CN_columns
 
 
-    def get_time_columns(self) -> (List[datetime]):
+    def get_time_columns(self) -> list[str]:
         """
         Filter and keep only the values in the transit_times DataFrame that contain 'time' in their index.
         Returns a list of datetime objects.
         """
         try:
-            time_columns = self.transit_times.loc[self.transit_times.index.str.contains('time')].to_list()
+            time_columns: list[str] = self.transit_times.loc[self.transit_times.index.str.contains('time')].to_list()
         except AttributeError as error:
-            print("self.transit_times n'a peut-être pas été initialisé...")
+            logging.error("self.transit_times n'a peut-être pas été initialisé...")
             raise error
         return time_columns
 
 
-
-
-
-    def check_nb_records_is_coherent(self, show_log=True):
+    def check_nb_records_is_coherent(self):
         """"
         Lit transit_times et vérifie que 'No. of records' est cohérent avec le nombre de colonnes 'Record x CN'.\n
         Sinon renvoie une exception NoOfRecordsNotCoherentError.
@@ -83,7 +82,7 @@ class Team:
             print(f"/!\\ Le nombre de colonnes 'Record x CN' de {self.team_name} ({self.puce}) n'est pas cohérent avec 'No. of records' ({self.transit_times['No. of records']} attendus)!")
 
 
-    def check_all_epreuve_badgeuses_are_present(self, show_log=True):
+    def check_all_epreuve_badgeuses_are_present(self):
         """Pour chaque épreuve dans team.runned_epreuve_courses_list, vérifie que toutes les badgeuses de l'épreuves sont présentes dans team.transit_times, le bon nombre de fois (ignore la badgeuse -1 de mass_start).\n
         Retourne True si une badgeuse n'a pas été bipée, False sinon."""
         
@@ -115,7 +114,7 @@ class Team:
         pass
     
 
-    def aggregate_transit_times_by_epreuve(self, epreuve_to_aggregate: EpreuveCourse, show_log=False):
+    def aggregate_transit_times_by_epreuve(self, epreuve_to_aggregate: EpreuveCourse):
         """
         Affecte les temps de transit_times aux épreuves correspondantes.
 
@@ -124,9 +123,9 @@ class Team:
 
         for epreuve_dict in self.runned_epreuve_courses_list:
             if epreuve_dict['epreuve_course'] == epreuve_to_aggregate:
+                logging.debug(f"{self}: Regroupement des poinçons de {epreuve_to_aggregate.name}...")
                 
-                if show_log: print(f"{self.team_name}: Regroupement des poinçons de {epreuve_to_aggregate}")
-                epreuve_dict['poincons_times'] = []
+                epreuve_dict['poincons_times']: list[tuple[Poincon, str]] = []
 
                 epreuve: EpreuveCourse = epreuve_dict['epreuve_course']
 
@@ -135,12 +134,12 @@ class Team:
 
                 badgeuse_idx = 0
                 while badgeuse_idx < len(epreuve.badgeuses_list):
-                    # print(f"badgeuse_idx: {badgeuse_idx}\nCN_list: {CN_list}\nepreuve.badgeuses_list[badgeuse_idx]['badgeuse_num']: {epreuve.badgeuses_list[badgeuse_idx].badgeuse}")
-                    
+
                     if CN_list[0] == epreuve.badgeuses_list[badgeuse_idx].badgeuse:
                         CN_list.pop(0)
                         bip_time = bip_time_list.pop(0)
                         epreuve_dict['poincons_times'].append((epreuve.badgeuses_list[badgeuse_idx], bip_time))
+                        logging.debug(f"[{self.dossard}] a bipé {epreuve.badgeuses_list[badgeuse_idx]} à {bip_time}")
                         badgeuse_idx += 1
                     else:
                         CN_list.pop(0)
@@ -149,19 +148,18 @@ class Team:
         self.check_depart_gel_degel_fin()
 
 
-    
-    def calculate_epreuve_course_times(self, epreuve_to_calculate):
+    def calculate_epreuve_course_times(self, epreuve_to_calculate: EpreuveCourse):
         """Calcule les temps mis par l'équipe sur une course."""
-        
+
         for epreuve_course_dict in self.runned_epreuve_courses_list:
             if epreuve_course_dict['epreuve_course'] == epreuve_to_calculate:
+                logging.debug(f"{self}: Calcul des temps courus sur {epreuve_to_calculate.name}...")
 
-                epreuve_course_dict['elementary_times'] = []    # Stocke les temps mis entre deux badgeuses sous la forme
+                epreuve_course_dict['elementary_times']: list[tuple[float, Poincon,  Poincon]] = []    # Stocke les temps mis entre deux badgeuses sous la forme
                 
                 poincon_time_list: list[tuple[Poincon, str]] = epreuve_course_dict['poincons_times']
                 # Sécurité non nécessaire après le check_depart_gel_degel_fin() mais qui a le mérite d'exister 
                 # if (len(times_dict_list) % 2) != 0: raise OddNumberOfBipsError(self.team_name, epreuve_course_dict['epreuve_course'].name)
-
 
                 for i in range(0, len(poincon_time_list)):
 
@@ -169,9 +167,9 @@ class Team:
                     if poincon.role != 'fin':   # Evite une erreur d'indice out of bound
                         poincon_next, time_next = poincon_time_list[i+1]
 
-
                     if poincon.role in ['gel', 'fin']:
                         continue
+                    
                     else:
                         first_time = datetime.strptime(time, "%H:%M:%S")
                         second_time = datetime.strptime(time_next, "%H:%M:%S")
@@ -180,21 +178,24 @@ class Team:
                         
                         # Stocke sous la forme (temps entre P1 et P2, P1, P2)
                         epreuve_course_dict['elementary_times'].append((elementary_time.total_seconds(), poincon, poincon_next))
+                        logging.debug(f"[{self.dossard}] a mis {elementary_time.total_seconds()}s entre {poincon} et {poincon_next}.")
 
 
                 # Calcul du temps total sur l'épreuve
-                epreuve_course_dict['total_time'] = sum([elementary_time[0] for elementary_time in epreuve_course_dict['elementary_times']])
+                epreuve_course_dict['total_time']: float = sum([elementary_time[0] for elementary_time in epreuve_course_dict['elementary_times']])
+                logging.info(f"[{self.dossard}] a mis {epreuve_course_dict['total_time']}s sur {epreuve_to_calculate.name}.")
 
                 # Calcul du temps meilleur grimpeur
-                if epreuve_course_dict['epreuve_course'].meilleur_grimpeur:
+                if epreuve_to_calculate.meilleur_grimpeur:
 
                     for elementary_time_tuple in epreuve_course_dict['elementary_times']:
+                        
                         elementary_time, poincon_1, poincon_2 = elementary_time_tuple
                         if poincon_1.is_debut_mg and poincon_2.is_fin_mg:
                             epreuve_course_dict['mg_time'] = elementary_time
+                            logging.info(f"[{self.dossard}] a mis {elementary_time}s sur le MG.")
 
     
-
     def calculate_epreuves_course_points(self, show_log=False):
         """
         Calcule les points engrangés pour chaque course:
@@ -262,7 +263,6 @@ class Team:
         
         self.actis_points = sum([acti['participation_points']+acti['ranking_points'] for acti in self.epreuve_actis_list])
         self.total_points = self.courses_points + self.actis_points
-
 
 
     def check_depart_gel_degel_fin(self):

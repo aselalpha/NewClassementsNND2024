@@ -28,7 +28,7 @@ def main():
 
     for day in nightnday.odc_list:
         day.initialize()
-        # day.calculate_times()
+        day.calculate_times()
         # day.calculate_scores()
 
 

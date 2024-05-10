@@ -53,6 +53,20 @@ class OneDayController:
         self.add_actis_to_teams()
     
 
+    def calculate_times(self):
+        """Calcule les temps mis par chaque équipe sur chaque épreuve."""
+        logging.info("Calcul des temps courus par chaque équipe sur chaque épreuve...")
+
+        for team in self.teams_list:
+            for epreuve_course in self.epreuves_courses_list:
+                team.aggregate_transit_times_by_epreuve(epreuve_course)
+                team.calculate_epreuve_course_times(epreuve_course)
+        logging.info("Temps calculés.\n" + "-"*50)
+
+
+    ##################################
+    ### Appelées dans initialize() ###
+    ##################################
 
     def add_badgeuses_to_epreuves(self):
         """Ajoute les badgeuses lues dans le POLIS_badgeuses à l'épreuve correspondante de epreuves_list."""
@@ -169,6 +183,9 @@ class OneDayController:
         logging.info("Tous les résultats d'actis sont ajoutés.\n" + "-"*50)
 
 
+    ##################################
+
+
     def get_team_from_dossard(self, dossard) -> (Team):
 
         for team in self.teams_list:
@@ -198,7 +215,6 @@ class OneDayController:
             logging.info(epreuve_course.name, epreuve_course.mean_times_between_poincons)
 
 
-
     def check_mass_start_time_format(self):
         """Check if the format of mass_start is hh:mm:ss"""
         try:
@@ -211,9 +227,6 @@ class OneDayController:
                 int(time)
         except ValueError:
             raise MassStartTimeFormatNotValidError(self.mass_start)
-
-
-
 
 
     def get_team_from_doigt(self, row) -> Team:
@@ -237,6 +250,7 @@ class OneDayController:
                     return epreuve
             raise EpreuveInPolisBadgeusesNotFoundError(epreuve_name, self.epreuves_list)
 
+
     def clean_teams_not_running(self):
         """Supprime de la liste des équipes toutes celles qui n'ont pas de donnée de doigt associée."""
 
@@ -251,6 +265,9 @@ class OneDayController:
 
 
 
+#########################
+### Classes d'Erreurs ###
+#########################
 
 
 class EpreuveInPolisBadgeusesNotFoundError(Exception):
